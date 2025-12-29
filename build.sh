@@ -27,8 +27,6 @@ DATE_TITLE=$(date +"%d%m%Y")
 TIME_TITLE=$(date +"%H%M%S")
 DATE_CAPTION=$(date +"%d %B %Y")
 
-ZIP_NAME="${KERNEL_NAME}-${DEVICE}-${KERNEL_VERSION}-${DATE_TITLE}-${TIME_TITLE}.zip"
-
 # ================= TELEGRAM =================
 TG_BOT_TOKEN="7443002324:AAFpDcG3_9L0Jhy4v98RCBqu2pGfznBCiDM"
 TG_CHAT_ID="-1003520316735"
@@ -39,6 +37,7 @@ KERNEL_VERSION="unknown"
 TC_INFO="unknown"
 IMG_USED="unknown"
 MD5_HASH="unknown"
+ZIP_NAME=""
 
 # ================= FUNCTION =================
 
@@ -51,32 +50,30 @@ clone_anykernel() {
 
 get_toolchain_info() {
     if command -v "${TC64}gcc" >/dev/null 2>&1; then
-        TC_INFO="$("${TC64}gcc" --version | head -n1)"
+        GCC_VER=$("${TC64}gcc" -dumpversion)
+        TC_INFO="GCC ${GCC_VER}"
     elif command -v gcc >/dev/null 2>&1; then
-        TC_INFO="$(gcc --version | head -n1)"
+        GCC_VER=$(gcc -dumpversion)
+        TC_INFO="GCC ${GCC_VER}"
     else
         TC_INFO="unknown"
     fi
 }
 
-# === FINAL KERNEL VERSION ===
 get_kernel_version() {
     if [ -f "out/include/generated/utsrelease.h" ]; then
         KERNEL_VERSION=$(sed -n 's/#define UTS_RELEASE "\(.*\)"/\1/p' \
             out/include/generated/utsrelease.h)
-        KERNEL_VERSION=$(echo "$KERNEL_VERSION" | cut -d- -f1)
     else
         KERNEL_VERSION="unknown"
     fi
 }
 
 send_telegram_error() {
-    local ERROR_MSG="$1"
-
     curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
         -d chat_id="${TG_CHAT_ID}" \
         -d parse_mode=Markdown \
-        -d text="* Error Kernel CI Build Failed*"
+        -d text="❌ *Kernel CI Build Failed*"
 }
 
 build_kernel() {
@@ -84,15 +81,14 @@ build_kernel() {
 
     rm -rf out
     make O=out ARCH=arm64 rolex_defconfig || {
-        get_toolchain_info
-        send_telegram_error "Defconfig failed"
+        send_telegram_error
         exit 1
     }
-    
+
     curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
         -d chat_id="${TG_CHAT_ID}" \
         -d parse_mode=Markdown \
-        -d text="*Kernel CI Build Started...*"
+        -d text="🚀 *Kernel CI Build Started...*"
 
     get_toolchain_info
     BUILD_START=$(date +%s)
@@ -100,18 +96,18 @@ build_kernel() {
     make -j$(nproc) O=out ARCH=arm64 \
         CROSS_COMPILE=$TC64 \
         CROSS_COMPILE_ARM32=$TC32 \
-        CROSS_COMPILE_COMPAT=$TC32
-
-    if [ $? -ne 0 ]; then
-        send_telegram_error "Kernel compilation failed"
+        CROSS_COMPILE_COMPAT=$TC32 || {
+        send_telegram_error
         exit 1
-    fi
+    }
 
     BUILD_END=$(date +%s)
     DIFF=$((BUILD_END - BUILD_START))
     BUILD_TIME="$((DIFF / 60)) min $((DIFF % 60)) sec"
 
     get_kernel_version
+
+    ZIP_NAME="${KERNEL_NAME}-${DEVICE}-${KERNEL_VERSION}-${DATE_TITLE}-${TIME_TITLE}.zip"
 }
 
 pack_kernel() {
@@ -129,7 +125,7 @@ pack_kernel() {
         cp "$KIMG" Image.gz
         IMG_USED="Image.gz"
     else
-        send_telegram_error "Kernel image not found"
+        send_telegram_error
         exit 1
     fi
 
@@ -138,7 +134,6 @@ pack_kernel() {
     MD5_HASH=$(md5sum "$ZIP_NAME" | awk '{print $1}')
 
     echo -e "$green[✓] Zip created: $ZIP_NAME ($IMG_USED)$white"
-    echo -e "$green[✓] MD5: $MD5_HASH$white"
 }
 
 upload_telegram() {
