@@ -50,8 +50,10 @@ clone_anykernel() {
 }
 
 get_toolchain_info() {
-    if [ -x "${TC64}gcc" ]; then
-        TC_INFO="$("${TC64}gcc" --version | head -n1 | awk '{print $1, $2}')"
+    if command -v "${TC64}gcc" >/dev/null 2>&1; then
+        TC_INFO="$("${TC64}gcc" --version | head -n1)"
+    elif command -v gcc >/dev/null 2>&1; then
+        TC_INFO="$(gcc --version | head -n1)"
     else
         TC_INFO="unknown"
     fi
