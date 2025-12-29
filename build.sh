@@ -77,10 +77,6 @@ send_telegram_error() {
 }
 
 build_kernel() {
-curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
-        -d chat_id="${TG_CHAT_ID}" \
-        -d parse_mode=Markdown \
-        -d text="🚀 *Kernel CI Build Started...*"
         
     echo -e "$yellow[+] Building kernel...$white"
 
@@ -92,6 +88,11 @@ curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
 
     get_toolchain_info
     BUILD_START=$(date +%s)
+
+curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+        -d chat_id="${TG_CHAT_ID}" \
+        -d parse_mode=Markdown \
+        -d text="🚀 *Kernel CI Build Started...*"
 
     make -j$(nproc) O=out ARCH=arm64 \
         CROSS_COMPILE=$TC64 \
