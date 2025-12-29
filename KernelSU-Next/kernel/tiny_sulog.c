@@ -31,7 +31,7 @@ void write_sulog(uint8_t sym)
 	struct sulog_entry entry = {0};
 
 	// WARNING!!! this is LE only!
-	entry.s_time = (uint32_t)(ktime_get_boottime() / 1000000000);
+	entry.s_time = (uint32_t)ktime_get_boottime_seconds();
 	entry.data = (uint32_t)current_uid().val;
 	memcpy((void *)&entry.data + 3, &sym, 1);
 
