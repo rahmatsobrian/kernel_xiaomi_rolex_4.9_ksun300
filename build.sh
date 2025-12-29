@@ -74,17 +74,7 @@ send_telegram_error() {
     curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
         -d chat_id="${TG_CHAT_ID}" \
         -d parse_mode=Markdown \
-        -d text="❌ *Kernel CI Build Failed*
-
-📱 *Device* : ${DEVICE}
-🧠 *Kernel Name* : ${KERNEL_NAME}
-🧬 *Kernel Version* : ${KERNEL_VERSION}
-🛠 *Toolchain* : ${TC_INFO}
-
-⚠️ *Error* :
-\`${ERROR_MSG}\`
-
-🕒 *Build Date* : ${DATE_CAPTION}"
+        -d text="* Error Kernel CI Build Failed*"
 }
 
 build_kernel() {
@@ -162,8 +152,8 @@ upload_telegram() {
         -F caption="🔥 *Kernel CI Build Success*
 
 📱 *Device* : ${DEVICE}
-🧠 *Kernel Name* : ${KERNEL_NAME}
-🧬 *Kernel Version* : ${KERNEL_VERSION}
+📦 *Kernel Name* : ${KERNEL_NAME}
+🍃 *Kernel Version* : ${KERNEL_VERSION}
 
 🛠 *Toolchain* : ${TC_INFO}
 
