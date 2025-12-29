@@ -1,5 +1,10 @@
 #!/bin/bash
 
+curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+        -d chat_id="${TG_CHAT_ID}" \
+        -d parse_mode=Markdown \
+        -d text="🚀 *Kernel CI Build Started...*"
+
 # ================= COLOR =================
 red='\033[0;31m'
 green='\033[0;32m'
@@ -84,11 +89,6 @@ build_kernel() {
         send_telegram_error
         exit 1
     }
-
-    curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
-        -d chat_id="${TG_CHAT_ID}" \
-        -d parse_mode=Markdown \
-        -d text="🚀 *Kernel CI Build Started...*"
 
     get_toolchain_info
     BUILD_START=$(date +%s)
