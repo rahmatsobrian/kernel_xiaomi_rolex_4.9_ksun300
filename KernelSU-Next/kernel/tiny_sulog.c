@@ -31,7 +31,7 @@ void write_sulog(uint8_t sym)
 	struct sulog_entry entry = {0};
 
 	// WARNING!!! this is LE only!
-	entry.s_time = (uint32_t)(ktime_get_boottime() / 1000000000);
+	entry.s_time = (uint32_t)(ktime_to_ns(ktime_get_boottime()) / 1000000000ULL);
 	entry.data = (uint32_t)current_uid().val;
 	memcpy((void *)&entry.data + 3, &sym, 1);
 
@@ -66,7 +66,7 @@ int send_sulog_dump(void __user *uptr)
 		return 1;
 
 	// send uptime
-	uint32_t uptime = (uint32_t)(ktime_get_boottime() / 1000000000);
+	uint32_t uptime = (uint32_t)(ktime_to_ns(ktime_get_boottime()) / 1000000000ULL);
 	if (copy_to_user((void __user *)sbuf.uptime_ptr, &uptime, sizeof(uptime) ))
 		return 1;
 
