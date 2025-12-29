@@ -53,6 +53,7 @@ scm_version()
 			# If only the short version is requested, don't bother
 			# running further git commands
 			if $short; then
+              echo ""
 				return
 			fi
 			# If we are past a tagged commit (like
@@ -81,7 +82,7 @@ scm_version()
 			git --no-optional-locks status -uno --porcelain 2>/dev/null ||
 			git diff-index --name-only HEAD
 		} | grep -qvE '^(.. )?scripts/package'; then
-			#printf '%s' -dirty
+			printf '%s' -dirty
 		fi
 
 		# All done with git
@@ -104,9 +105,9 @@ scm_version()
 
 		# Are there uncommitted changes?
 		# These are represented by + after the changeset id.
-		#case "$hgid" in
-			#*+|*+\ *) printf '%s' -dirty ;;
-		#esac
+		case "$hgid" in
+			*+|*+\ *) printf '%s' -dirty ;;
+		esac
 
 		# All done with mercurial
 		return
@@ -172,10 +173,10 @@ else
 	# annotated or signed tagged state (as git describe only
 	# looks at signed or annotated tags - git tag -a/-s) and
 	# LOCALVERSION= is not specified
-	#if test "${LOCALVERSION+set}" != "set"; then
-		#scm=$(scm_version --short)
-		#res="$res${scm:++}"
-	#fi
+	if test "${LOCALVERSION+set}" != "set"; then
+		scm=$(scm_version --short)
+		res="$res${scm:++}"
+	fi
 fi
 
 echo "$res"
