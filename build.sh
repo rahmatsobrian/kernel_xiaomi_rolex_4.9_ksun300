@@ -27,7 +27,7 @@ DATE_TITLE=$(date +"%d%m%Y")
 TIME_TITLE=$(date +"%H%M%S")
 DATE_CAPTION=$(date +"%d %B %Y")
 
-ZIP_NAME="${KERNEL_NAME}-${DEVICE}-${DATE_TITLE}-${TIME_TITLE}.zip"
+ZIP_NAME="${KERNEL_NAME}-${DEVICE}-${KERNEL_VERSION}-${DATE_TITLE}-${TIME_TITLE}.zip"
 
 # ================= TELEGRAM =================
 TG_BOT_TOKEN="7443002324:AAFpDcG3_9L0Jhy4v98RCBqu2pGfznBCiDM"
