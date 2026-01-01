@@ -61,9 +61,12 @@ get_toolchain_info() {
 }
 
 get_kernel_version() {
-    if [ -f "out/include/generated/utsrelease.h" ]; then
-        KERNEL_VERSION=$(sed -n 's/#define UTS_RELEASE "\(.*\)"/\1/p' \
-            out/include/generated/utsrelease.h)
+    if [ -f "Makefile" ]; then
+        VERSION=$(grep -E '^VERSION =' Makefile | awk '{print $3}')
+        PATCHLEVEL=$(grep -E '^PATCHLEVEL =' Makefile | awk '{print $3}')
+        SUBLEVEL=$(grep -E '^SUBLEVEL =' Makefile | awk '{print $3}')
+        
+        KERNEL_VERSION="${VERSION}.${PATCHLEVEL}.${SUBLEVEL}"
     else
         KERNEL_VERSION="unknown"
     fi
