@@ -25,7 +25,7 @@ DEVICE="Rolex"
 # ================= DATE (WIB) =================
 DATE_TITLE=$(TZ=Asia/Jakarta date +"%d%m%Y")
 TIME_TITLE=$(TZ=Asia/Jakarta date +"%H%M%S")
-BUILD_DATETIME=$(TZ=Asia/Jakarta date +"%d %B %Y %H:%M:%S WIB")
+BUILD_DATETIME=$(TZ=Asia/Jakarta date +"%d %B %Y")
 
 # ================= TELEGRAM =================
 TG_BOT_TOKEN="7443002324:AAFpDcG3_9L0Jhy4v98RCBqu2pGfznBCiDM"
@@ -157,7 +157,7 @@ upload_telegram() {
 🛠 *Toolchain* : ${TC_INFO}
 
 ⌛ *Build Time* : ${BUILD_TIME}
-🕒 *Build Date* : ${DATE_TITLE}
+🕒 *Build Date* : ${BUILD_DATETIME}
 
 🔐 *MD5* :
 \`${MD5_HASH}\`
