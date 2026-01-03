@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # ================= COLOR =================
@@ -22,10 +23,10 @@ TC32="arm-linux-gnueabi-"
 KERNEL_NAME="ReLIFE"
 DEVICE="Rolex"
 
-# ================= DATE =================
-DATE_TITLE=$(date +"%d%m%Y")
-TIME_TITLE=$(date +"%H%M%S")
-DATE_CAPTION=$(date +"%d %B %Y")
+# ================= DATE (WIB) =================
+DATE_TITLE=$(TZ=Asia/Jakarta date +"%d%m%Y")
+TIME_TITLE=$(TZ=Asia/Jakarta date +"%H%M%S")
+BUILD_DATETIME=$(TZ=Asia/Jakarta date +"%d %B %Y %H:%M:%S WIB")
 
 # ================= TELEGRAM =================
 TG_BOT_TOKEN="7443002324:AAFpDcG3_9L0Jhy4v98RCBqu2pGfznBCiDM"
@@ -65,7 +66,6 @@ get_kernel_version() {
         VERSION=$(grep -E '^VERSION =' Makefile | awk '{print $3}')
         PATCHLEVEL=$(grep -E '^PATCHLEVEL =' Makefile | awk '{print $3}')
         SUBLEVEL=$(grep -E '^SUBLEVEL =' Makefile | awk '{print $3}')
-        
         KERNEL_VERSION="${VERSION}.${PATCHLEVEL}.${SUBLEVEL}"
     else
         KERNEL_VERSION="unknown"
@@ -80,7 +80,7 @@ send_telegram_error() {
 }
 
 build_kernel() {
-        
+
     echo -e "$yellow[+] Building kernel...$white"
 
     rm -rf out
@@ -90,9 +90,9 @@ build_kernel() {
     }
 
     get_toolchain_info
-    BUILD_START=$(date +%s)
+    BUILD_START=$(TZ=Asia/Jakarta date +%s)
 
-curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+    curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
         -d chat_id="${TG_CHAT_ID}" \
         -d parse_mode=Markdown \
         -d text="🚀 *Kernel CI Build Started...*"
@@ -105,7 +105,7 @@ curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
         exit 1
     }
 
-    BUILD_END=$(date +%s)
+    BUILD_END=$(TZ=Asia/Jakarta date +%s)
     DIFF=$((BUILD_END - BUILD_START))
     BUILD_TIME="$((DIFF / 60)) min $((DIFF % 60)) sec"
 
@@ -134,7 +134,6 @@ pack_kernel() {
     fi
 
     zip -r9 "$ZIP_NAME" . -x ".git*" "README.md"
-
     MD5_HASH=$(md5sum "$ZIP_NAME" | awk '{print $1}')
 
     echo -e "$green[✓] Zip created: $ZIP_NAME ($IMG_USED)$white"
@@ -159,7 +158,7 @@ upload_telegram() {
 🛠 *Toolchain* : ${TC_INFO}
 
 ⌛ *Build Time* : ${BUILD_TIME}
-🕒 *Build Date* : ${DATE_CAPTION}
+🕒 *Build Date* : ${BUILD_DATETIME}
 
 🔐 *MD5* :
 \`${MD5_HASH}\`
@@ -168,11 +167,11 @@ upload_telegram() {
 }
 
 # ================= RUN =================
-START=$(date +%s)
+START=$(TZ=Asia/Jakarta date +%s)
 
 build_kernel
 pack_kernel
 upload_telegram
 
-END=$(date +%s)
+END=$(TZ=Asia/Jakarta date +%s)
 echo -e "$green[✓] Done in $((END - START)) seconds$white"
