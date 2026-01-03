@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # ================= COLOR =================
@@ -158,7 +157,7 @@ upload_telegram() {
 🛠 *Toolchain* : ${TC_INFO}
 
 ⌛ *Build Time* : ${BUILD_TIME}
-🕒 *Build Date* : ${BUILD_DATETIME}
+🕒 *Build Date* : ${DATE_TITLE}
 
 🔐 *MD5* :
 \`${MD5_HASH}\`
