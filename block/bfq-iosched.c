@@ -183,7 +183,7 @@ static void bfq_schedule_dispatch(struct bfq_data *bfqd);
  */
 static int bfq_bio_sync(struct bio *bio)
 {
-	if (bio_data_dir(bio) == READ || (bio->bi_rw & REQ_SYNC))
+	if (bio_data_dir(bio) == READ || bio_is_sync(bio))
 		return 1;
 
 	return 0;
@@ -1017,7 +1017,7 @@ static int bfq_merge(struct request_queue *q, struct request **req,
 	struct request *__rq;
 
 	__rq = bfq_find_rq_fmerge(bfqd, bio);
-	if (__rq && elv_rq_merge_ok(__rq, bio)) {
+	if (__rq && blk_rq_merge_ok(__rq, bio)) {
 		*req = __rq;
 		return ELEVATOR_FRONT_MERGE;
 	}
@@ -1129,7 +1129,7 @@ static void bfq_end_wr(struct bfq_data *bfqd)
 }
 
 static int bfq_allow_merge(struct request_queue *q, struct request *rq,
-			   struct bio *bio)
+			   struct request *next)
 {
 	struct bfq_data *bfqd = q->elevator->elevator_data;
 	struct bfq_io_cq *bic;
@@ -3069,7 +3069,7 @@ static int bfq_may_queue(struct request_queue *q, int rw, int priv)
 	if (!bic)
 		return ELV_MQUEUE_MAY;
 
-	bfqq = bic_to_bfqq(bic, op_is_sync(rw));
+	bfqq = bic_to_bfqq(bic, rq_is_sync(rw));
 	if (bfqq)
 		return __bfq_may_queue(bfqq);
 
