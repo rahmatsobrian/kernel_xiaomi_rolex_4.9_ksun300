@@ -2278,28 +2278,19 @@ static int get_prop_capacity(struct fg_chip *chip)
 			}
 
 			if (!vbatt_low_sts)
-    msoc = chip->last_soc;
-else
-    return EMPTY_CAPACITY;
+				return DIV_ROUND_CLOSEST((chip->last_soc - 1) *
+						(FULL_CAPACITY - 2),
+						FULL_SOC_RAW - 2) + 1;
+		else
+			return EMPTY_CAPACITY;
 		} else {
 			return EMPTY_CAPACITY;
 		}
 	} else if (msoc == FULL_SOC_RAW) {
 		return FULL_CAPACITY;
 	}
-
-	/* Hitung SOC menu dari msoc mentah */
-msoc = DIV_ROUND_CLOSEST((msoc - 1) * (FULL_CAPACITY - 2),
-        FULL_SOC_RAW - 2) + 1;
-
-/* 🛡️ Proteksi: jangan turunkan SOC terlalu drastis */
-if (chip->last_soc > 0 && msoc < chip->last_soc - 2)
-    msoc = chip->last_soc - 1;
-
-/* Simpan SOC terakhir */
-chip->last_soc = msoc;
-
-return msoc;
+	return DIV_ROUND_CLOSEST((msoc - 1) * (FULL_CAPACITY - 2),
+			FULL_SOC_RAW - 2) + 1;
 }
 
 #define HIGH_BIAS	3
@@ -5368,7 +5359,7 @@ static irqreturn_t fg_soc_irq_handler(int irq, void *_chip)
 	}
 
 	/* Backup last soc every delta soc interrupt */
-	chip->use_last_soc = true;
+	chip->use_last_soc = false;
 	if (fg_reset_on_lockup) {
 		if (!chip->ima_error_handling)
 			chip->last_soc = get_monotonic_soc_raw(chip);
