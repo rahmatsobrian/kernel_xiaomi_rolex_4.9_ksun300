@@ -183,7 +183,8 @@ static void bfq_schedule_dispatch(struct bfq_data *bfqd);
  */
 static int bfq_bio_sync(struct bio *bio)
 {
-	if (bio_data_dir(bio) == READ || bio_is_sync(bio))
+	if (bio_data_dir(bio) == READ ||
+	    (bio->bi_opf & REQ_SYNC))
 		return 1;
 
 	return 0;
@@ -1137,7 +1138,7 @@ static int bfq_allow_merge(struct request_queue *q, struct request *rq,
 	/*
 	 * Disallow merge of a sync bio into an async request.
 	 */
-	if (bfq_bio_sync(bio) && !rq_is_sync(rq))
+	if (rq_is_sync(next) && !rq_is_sync(rq))
 		return 0;
 
 	/*
@@ -1149,7 +1150,7 @@ static int bfq_allow_merge(struct request_queue *q, struct request *rq,
 	if (!bic)
 		return 0;
 
-	return bic_to_bfqq(bic, bfq_bio_sync(bio)) == RQ_BFQQ(rq);
+	return bic_to_bfqq(bic, rq_is_sync(next)) == RQ_BFQQ(rq);
 }
 
 static void __bfq_set_in_service_queue(struct bfq_data *bfqd,
