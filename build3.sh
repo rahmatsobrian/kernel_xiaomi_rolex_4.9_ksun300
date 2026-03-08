@@ -44,7 +44,10 @@ ZIP_NAME=""
 clone_anykernel() {
     if [ ! -d "$ANYKERNEL_DIR" ]; then
         echo -e "$yellow[+] Cloning AnyKernel3...$white"
-        git clone -b https://github.com/rahmatsobrian/AnyKernel3.git "$ANYKERNEL_DIR" || exit 1
+        git clone https://github.com/rahmatsobrian/AnyKernel3.git "$ANYKERNEL_DIR" || {
+        send_telegram_error
+        exit 1
+    }
     fi
 }
 
